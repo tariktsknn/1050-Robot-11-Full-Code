@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Smart Box — Order</title>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap");
+
+    :root {
+      --bg: #e4ecfa;
+      --surface: #f0f5fe;
+      --surface-2: #ffffff;
+      --ink: #0f172a;
+      --muted: #5c6b8a;
+      --accent: #2563eb;
+      --accent-dark: #1d4ed8;
+      --accent-glow: rgba(37, 99, 235, 0.22);
+      --info: #1e40af;
+      --info-soft: #dbeafe;
+      --border: rgba(15, 23, 42, 0.09);
+      --shadow: 0 2px 8px rgba(30, 64, 175, 0.07), 0 18px 44px rgba(15, 23, 42, 0.08);
+      --radius: 18px;
+      --radius-sm: 12px;
+      --font: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: var(--font);
+      font-optical-sizing: auto;
+      color: var(--ink);
+      line-height: 1.55;
+      background:
+        radial-gradient(900px 520px at 0% -10%, rgba(37, 99, 235, 0.14), transparent 55%),
+        radial-gradient(700px 480px at 100% 0%, rgba(14, 116, 175, 0.1), transparent 52%),
+        radial-gradient(600px 400px at 50% 100%, rgba(99, 102, 241, 0.08), transparent 45%),
+        var(--bg);
+    }
+
+    .wrap {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 2rem 1.25rem 3.5rem;
+    }
+
+    .hero {
+      margin-bottom: 1.75rem;
+    }
+    .eyebrow {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--info);
+      opacity: 0.85;
+      margin: 0 0 0.4rem;
+    }
+    h1 {
+      font-size: clamp(1.65rem, 4.5vw, 2rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin: 0 0 0.5rem;
+      color: var(--ink);
+    }
+    .sub {
+      margin: 0;
+      font-size: 0.98rem;
+      color: var(--muted);
+      max-width: 38em;
+    }
+
+    .card {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.35rem 1.4rem;
+      box-shadow: var(--shadow);
+      margin-bottom: 1rem;
+    }
+    .card-muted {
+      background: var(--surface);
+    }
+    .robot-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: var(--radius);
+      margin-bottom: 1rem;
+    }
+    h2 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin: 0 0 1rem;
+      color: var(--ink);
+    }
+
+    label.fld {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin: 0 0 0.4rem;
+      letter-spacing: 0.02em;
+    }
+    .row { display: flex; gap: 0.85rem; }
+    .row > * { flex: 1; }
+    .field-group { margin-bottom: 1rem; }
+    .field-group:first-of-type .fld { margin-top: 0; }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 0.72rem 0.85rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      font: inherit;
+      font-size: 0.95rem;
+      background: #fff;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    input[type="text"]:focus {
+      outline: none;
+      border-color: rgba(37, 99, 235, 0.5);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .food-label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin: 0 0 0.65rem;
+      letter-spacing: 0.02em;
+    }
+
+    .food-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.75rem;
+    }
+    @media (min-width: 520px) {
+      .food-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+
+    .food-grid input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .food-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 0.85rem 0.6rem 0.75rem;
+      border-radius: var(--radius-sm);
+      border: 2px solid var(--border);
+      background: #fff;
+      cursor: pointer;
+      transition: border-color 0.18s, background 0.18s, transform 0.15s, box-shadow 0.18s;
+      min-height: 128px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .food-card:hover {
+      border-color: rgba(37, 99, 235, 0.35);
+      box-shadow: 0 4px 18px rgba(37, 99, 235, 0.1);
+    }
+    .food-grid input:focus-visible + .food-card {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    .food-grid input:checked + .food-card {
+      border-color: var(--accent);
+      background: linear-gradient(160deg, #eff6ff 0%, #fff 100%);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+    .food-card .pic {
+      width: 72px;
+      height: 72px;
+      margin-bottom: 0.45rem;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(145deg, var(--info-soft) 0%, #e8eef7 100%);
+    }
+    .food-card .pic svg {
+      width: 56px;
+      height: 56px;
+      display: block;
+    }
+    .food-card span {
+      font-size: 0.78rem;
+      font-weight: 600;
+      line-height: 1.25;
+      color: var(--ink);
+    }
+
+    .btns { display: flex; flex-wrap: wrap; gap: 0.65rem; margin-top: 1.15rem; }
+    button {
+      font: inherit;
+      cursor: pointer;
+      border-radius: var(--radius-sm);
+      border: none;
+      padding: 0.72rem 1.15rem;
+      font-weight: 600;
+      font-size: 0.92rem;
+    }
+    .btn-primary {
+      background: linear-gradient(180deg, var(--accent) 0%, var(--accent-dark) 100%);
+      color: #fff;
+      box-shadow: 0 2px 0 rgba(0, 0, 0, 0.1), 0 8px 26px rgba(37, 99, 235, 0.4);
+    }
+    .btn-primary:hover { filter: brightness(1.05); }
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      filter: none;
+      box-shadow: none;
+    }
+    .btn-secondary {
+      background: #e2e8f8;
+      color: var(--ink);
+    }
+    .btn-secondary:hover { background: #d5def0; }
+    .btn-ghost {
+      background: transparent;
+      color: var(--accent-dark);
+      border: 1px dashed rgba(37, 99, 235, 0.45);
+    }
+
+    .status {
+      font-size: 0.88rem;
+      padding: 0.75rem 0.9rem;
+      border-radius: var(--radius-sm);
+      background: #eff6ff;
+      color: var(--info);
+      margin-top: 0.85rem;
+      display: none;
+      border: 1px solid rgba(37, 99, 235, 0.2);
+    }
+    .status.on { display: block; }
+    .status.ok {
+      background: var(--info-soft);
+      color: var(--info);
+      border-color: rgba(37, 99, 235, 0.22);
+    }
+    .status.err {
+      background: #fef2f2;
+      color: #991b1b;
+      border-color: rgba(153, 27, 27, 0.15);
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.35rem 0.65rem;
+      border-radius: 999px;
+      background: #e2e8f8;
+      color: var(--ink);
+    }
+    .pill.live {
+      background: var(--info-soft);
+      color: var(--info);
+    }
+    .pill.dead {
+      background: #fcecec;
+      color: #991b1b;
+    }
+    .pill::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+      opacity: 0.45;
+    }
+    .pill.live::before { opacity: 0.95; background: #2563eb; }
+    .pill.dead::before { opacity: 0.85; background: #dc2626; }
+
+    details.log-details {
+      margin-top: 1rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: #f0f5fe;
+      overflow: hidden;
+    }
+    details.log-details summary {
+      cursor: pointer;
+      padding: 0.65rem 0.85rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--muted);
+      list-style: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      user-select: none;
+    }
+    details.log-details summary::-webkit-details-marker { display: none; }
+    details.log-details summary::after {
+      content: "▾";
+      font-size: 0.65rem;
+      opacity: 0.6;
+    }
+    details.log-details[open] summary::after { transform: rotate(180deg); }
+
+    .log {
+      max-height: 160px;
+      overflow: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.7rem;
+      line-height: 1.45;
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 0.7rem 0.8rem;
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .orders {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .orders li {
+      padding: 0.65rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.88rem;
+    }
+    .orders li:last-child { border-bottom: none; }
+    .picked-badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 0.2rem 0.45rem;
+      border-radius: 6px;
+      background: var(--info-soft);
+      color: var(--info);
+    }
+    .orders .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.85em;
+    }
+
+    .hint {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin: 0.85rem 0 0;
+      line-height: 1.5;
+    }
+    .hint code {
+      font-size: 0.78em;
+      padding: 0.12em 0.35em;
+      border-radius: 4px;
+      background: rgba(37, 99, 235, 0.09);
+      color: var(--info);
+    }
+
+    .conn-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.75rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <p class="eyebrow">Robot Food Delivery in Campus</p>
+      <h1>11 - Robot</h1>
+      <img src="600.jpg" alt="Robot" class="robot-image">
+      <p class="sub">Pick a meal, link your RFID card, and collect when your box unlocks.</p>
+    </header>
+
+    <div class="card card-muted">
+      <div class="conn-row">
+        <span id="connPill" class="pill dead">Bridge: connecting…</span>
+        <button type="button" class="btn-secondary" id="btnRetryWs">Retry</button>
+      </div>
+      <div id="lineStatus" class="status"></div>
+      <details class="log-details" id="logDetails">
+        <summary>Device activity (optional)</summary>
+        <pre id="serialLog" class="log"></pre>
+      </details>
+    </div>
+
+    <div class="card">
+      <h2>Your order</h2>
+      <form id="orderForm" autocomplete="on">
+        <div class="row">
+          <div class="field-group">
+            <label class="fld" for="firstName">First name</label>
+            <input id="firstName" name="firstName" type="text" required autocomplete="given-name" placeholder="Alex" />
+          </div>
+          <div class="field-group">
+            <label class="fld" for="lastName">Last name</label>
+            <input id="lastName" name="lastName" type="text" required autocomplete="family-name" placeholder="Rivera" />
+          </div>
+        </div>
+
+        <span class="food-label" id="foodLegend">Choose your food</span>
+        <div class="food-grid" role="group" aria-labelledby="foodLegend">
+          <label>
+            <input type="radio" name="food" value="Margherita pizza" required />
+            <span class="food-card">
+              <span class="pic" aria-hidden="true">
+                <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="32" cy="34" r="22" fill="#f4d03f" stroke="#1e40af" stroke-width="1.5"/>
+                  <path d="M18 30c4-6 10-8 14-8s10 2 14 8" stroke="#2563eb" stroke-width="1.2" stroke-linecap="round"/>
+                  <circle cx="26" cy="36" r="2.5" fill="#c0392b"/>
+                  <circle cx="36" cy="32" r="2.2" fill="#c0392b"/>
+                  <circle cx="32" cy="40" r="2" fill="#27ae60"/>
+                </svg>
+              </span>
+              <span>Margherita pizza</span>
+            </span>
+          </label>
+          <label>
+            <input type="radio" name="food" value="Classic burger" />
+            <span class="food-card">
+              <span class="pic" aria-hidden="true">
+                <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M14 26h36v8H14z" fill="#e8b86d" rx="2"/>
+                  <path d="M12 34h40v6H12z" fill="#5d4037"/>
+                  <path d="M14 40h36v5H14z" fill="#27ae60"/>
+                  <path d="M12 45h40v8H12z" fill="#e8b86d" rx="3"/>
+                  <ellipse cx="32" cy="24" rx="18" ry="5" fill="#f4d03f"/>
+                </svg>
+              </span>
+              <span>Classic burger</span>
+            </span>
+          </label>
+          <label>
+            <input type="radio" name="food" value="Caesar salad" />
+            <span class="food-card">
+              <span class="pic" aria-hidden="true">
+                <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M20 42c4-14 10-22 20-22s16 8 20 22" fill="#dbeafe" stroke="#1e40af" stroke-width="1.3"/>
+                  <path d="M22 38c3-8 7-12 14-12s11 4 14 12" stroke="#27ae60" stroke-width="1.5" stroke-linecap="round"/>
+                  <circle cx="30" cy="34" r="2.5" fill="#f4d03f"/>
+                  <circle cx="38" cy="36" r="2" fill="#c0392b"/>
+                </svg>
+              </span>
+              <span>Caesar salad</span>
+            </span>
+          </label>
+          <label>
+            <input type="radio" name="food" value="Pasta alfredo" />
+            <span class="food-card">
+              <span class="pic" aria-hidden="true">
+                <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <ellipse cx="32" cy="40" rx="20" ry="10" fill="#faf3e0" stroke="#1e40af" stroke-width="1.2"/>
+                  <path d="M18 50c4-4 8-6 14-6s10 2 14 6" stroke="#e8b86d" stroke-width="2" stroke-linecap="round"/>
+                  <path d="M22 38c3 2 6 3 10 3s7-1 10-3" stroke="#fff" stroke-width="1.5" opacity=".7"/>
+                  <ellipse cx="32" cy="32" rx="16" ry="8" fill="#f5f0e6"/>
+                </svg>
+              </span>
+              <span>Pasta alfredo</span>
+            </span>
+          </label>
+          <label>
+            <input type="radio" name="food" value="Veggie bowl" />
+            <span class="food-card">
+              <span class="pic" aria-hidden="true">
+                <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M16 44h32l-6-18H22l-6 18z" fill="#d7ccc8" stroke="#8d6e63" stroke-width="1.2"/>
+                  <circle cx="28" cy="34" r="5" fill="#27ae60"/>
+                  <circle cx="36" cy="32" r="4" fill="#f4d03f"/>
+                  <ellipse cx="32" cy="28" rx="6" ry="3" fill="#c0392b"/>
+                </svg>
+              </span>
+              <span>Veggie bowl</span>
+            </span>
+          </label>
+          <label>
+            <input type="radio" name="food" value="Soup of the day" />
+            <span class="food-card">
+              <span class="pic" aria-hidden="true">
+                <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <ellipse cx="32" cy="46" rx="18" ry="8" fill="#b8a99a"/>
+                  <path d="M18 46c2-14 6-22 14-26s12 12 14 26" fill="#2563eb" opacity=".45"/>
+                  <ellipse cx="32" cy="42" rx="14" ry="12" fill="#3b82f6" opacity=".35"/>
+                  <path d="M28 18v6M32 16v8M36 18v6" stroke="#95a5a6" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+              </span>
+              <span>Soup of the day</span>
+            </span>
+          </label>
+        </div>
+
+        <div class="btns">
+          <button type="submit" class="btn-primary" id="btnSubmit">Place order &amp; scan card</button>
+        </div>
+      </form>
+      <div id="formStatus" class="status"></div>
+    </div>
+
+    <div class="card card-muted">
+      <h2>Recent orders</h2>
+      <ul class="orders" id="orderList"></ul>
+      <button type="button" class="btn-ghost" id="btnClearLocal" style="margin-top:0.65rem">Clear saved orders</button>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "smartBoxOrders-v3";
+    try {
+      localStorage.removeItem("smartBoxOrders-v1");
+      localStorage.removeItem("smartBoxOrders-v2");
+    } catch (_) {}
+
+    let ws = null;
+    let reconnectTimer = 0;
+    let lastUid8 = null;
+    let lineGate = null;
+
+    const $ = (id) => document.getElementById(id);
+    const connPill = $("connPill");
+    const lineStatus = $("lineStatus");
+    const serialLog = $("serialLog");
+    const formStatus = $("formStatus");
+    const orderList = $("orderList");
+
+    function shouldHideFromLog(line) {
+      return /^Load cell reading:/i.test(line) || /^Scale default:/i.test(line);
+    }
+
+    function showStatus(el, text, kind) {
+      el.textContent = text;
+      el.classList.add("on");
+      el.classList.toggle("ok", kind === "ok");
+      el.classList.toggle("err", kind === "err");
+    }
+
+    function hideStatus(el) {
+      el.classList.remove("on", "ok", "err");
+      el.textContent = "";
+    }
+
+    function appendLog(line) {
+      if (shouldHideFromLog(line)) return;
+      const max = 4000;
+      const prev = serialLog.textContent;
+      serialLog.textContent = (prev + line + "\n").slice(-max);
+      serialLog.scrollTop = serialLog.scrollHeight;
+    }
+
+    function parseCardUidLine(line) {
+      const m = line.match(/Card UID:\s*(.+)/i);
+      if (!m) return null;
+      const parts = m[1].trim().split(/\s+/).filter(Boolean);
+      if (parts.length !== 4) return null;
+      const bytes = parts.map((p) => parseInt(p, 16));
+      if (bytes.some((n) => Number.isNaN(n))) return null;
+      return bytes.map((b) => b.toString(16).padStart(2, "0")).join("").toUpperCase();
+    }
+
+    function isBridgeConnected() {
+      return ws !== null && ws.readyState === WebSocket.OPEN;
+    }
+
+    function wsUrl() {
+      const proto = location.protocol === "https:" ? "wss:" : "ws:";
+      const host = location.host || "localhost:8080";
+      return proto + "//" + host + "/ws";
+    }
+
+    function writeLine(text) {
+      return new Promise((resolve, reject) => {
+        if (!isBridgeConnected()) {
+          reject(new Error("Not connected to the bridge. Run npm start in the bridge folder."));
+          return;
+        }
+        try {
+          ws.send(text.endsWith("\n") ? text : text + "\n");
+          resolve();
+        } catch (e) {
+          reject(e);
+        }
+      });
+    }
+
+    function processLine(raw) {
+      const line = raw.replace(/\r$/, "").trim();
+      if (!line) return;
+
+      appendLog(line);
+
+      const uid = parseCardUidLine(line);
+      if (uid) lastUid8 = uid;
+
+      if (line.startsWith("BRIDGE:ERROR:")) {
+        showStatus(lineStatus, "Serial: " + line.slice("BRIDGE:ERROR:".length), "err");
+      } else if (line === "BRIDGE:READY") {
+        showStatus(lineStatus, "Serial port opened on the bridge computer.", "ok");
+      } else if (line.includes("Burglary alert")) {
+        showStatus(lineStatus, "Device: burglary / force alarm", "err");
+      } else if (line.includes("Access granted")) {
+        showStatus(lineStatus, "Device: access granted (box unlocked)", "ok");
+        markPickedUpByUid(lastUid8);
+      } else if (line === "Access denied") {
+        showStatus(lineStatus, "Device: access denied", "err");
+      }
+
+      if (lineGate) lineGate(line);
+    }
+
+    let wsGeneration = 0;
+
+    function scheduleReconnect() {
+      clearTimeout(reconnectTimer);
+      reconnectTimer = setTimeout(connectBridge, 2000);
+    }
+
+    function connectBridge() {
+      clearTimeout(reconnectTimer);
+      wsGeneration += 1;
+      const gen = wsGeneration;
+      if (ws) {
+        try {
+          ws.onclose = null;
+          ws.close();
+        } catch (_) {}
+        ws = null;
+      }
+
+      connPill.textContent = "Bridge: connecting…";
+      connPill.classList.remove("live");
+      connPill.classList.add("dead");
+
+      const s = new WebSocket(wsUrl());
+
+      s.onopen = () => {
+        if (gen !== wsGeneration) {
+          try {
+            s.close();
+          } catch (_) {}
+          return;
+        }
+        ws = s;
+        connPill.textContent = "Bridge connected";
+        connPill.classList.add("live");
+        connPill.classList.remove("dead");
+        hideStatus(lineStatus);
+      };
+
+      s.onclose = () => {
+        if (ws === s) ws = null;
+        if (gen !== wsGeneration) return;
+        connPill.textContent = "Bridge offline — start npm in bridge/";
+        connPill.classList.remove("live");
+        connPill.classList.add("dead");
+        scheduleReconnect();
+      };
+
+      s.onerror = () => {
+        try {
+          s.close();
+        } catch (_) {}
+      };
+
+      s.onmessage = (ev) => {
+        if (gen !== wsGeneration) return;
+        const data = typeof ev.data === "string" ? ev.data : "";
+        processLine(data);
+      };
+    }
+
+    function waitForEnrollUid(timeoutMs) {
+      return new Promise((resolve, reject) => {
+        const t = setTimeout(() => {
+          lineGate = null;
+          reject(new Error("Timed out waiting for a card scan."));
+        }, timeoutMs);
+        lineGate = (line) => {
+          if (line === "ENROLL:BADSIZE") {
+            clearTimeout(t);
+            lineGate = null;
+            reject(new Error("This tag does not have a 4-byte UID. Try a MIFARE Classic 1K card."));
+            return;
+          }
+          if (line === "ENROLL:OK") {
+            if (!lastUid8) return;
+            clearTimeout(t);
+            lineGate = null;
+            resolve(lastUid8);
+          }
+        };
+      });
+    }
+
+    function waitForAddReply(timeoutMs) {
+      return new Promise((resolve, reject) => {
+        const t = setTimeout(() => {
+          lineGate = null;
+          reject(new Error("Timed out waiting for ADD response."));
+        }, timeoutMs);
+        lineGate = (line) => {
+          if (line.startsWith("OK:") || line.startsWith("ERR:")) {
+            clearTimeout(t);
+            lineGate = null;
+            resolve(line);
+          }
+        };
+      });
+    }
+
+    function selectedFood() {
+      const r = document.querySelector('input[name="food"]:checked');
+      return r ? r.value : "";
+    }
+
+    function loadOrders() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+      } catch {
+        return [];
+      }
+    }
+
+    /** When the box unlocks, treat that as pickup: drop stored UID for that order (privacy). */
+    function markPickedUpByUid(uid8) {
+      if (!uid8) return;
+      const rows = loadOrders();
+      let idx = -1;
+      for (let i = 0; i < rows.length; i++) {
+        const r = rows[i];
+        if (!r.pickedUp && r.uid8 === uid8) {
+          idx = i;
+          break;
+        }
+      }
+      if (idx < 0) return;
+      rows[idx].pickedUp = true;
+      delete rows[idx].uid8;
+      saveOrders(rows);
+    }
+
+    function saveOrders(rows) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(rows));
+      renderOrders();
+    }
+
+    function renderOrders() {
+      const rows = loadOrders();
+      orderList.innerHTML = rows
+        .slice()
+        .reverse()
+        .slice(0, 12)
+        .map((r) => {
+          const cardBit =
+            r.pickedUp || !r.uid8
+              ? `<span class="picked-badge">Picked up</span>`
+              : `Card <span class="mono">${escapeHtml(r.uid8)}</span>`;
+          return `<li><strong>${escapeHtml(r.first)} ${escapeHtml(r.last)}</strong> — ${escapeHtml(r.food)} · ${cardBit} · ${escapeHtml(r.created)}</li>`;
+        })
+        .join("");
+      if (!rows.length) orderList.innerHTML = '<li class="hint" style="border:0;padding:0;margin:0">No orders yet.</li>';
+    }
+
+    function escapeHtml(s) {
+      return String(s)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    document.getElementById("orderForm").addEventListener("submit", async (ev) => {
+      ev.preventDefault();
+      hideStatus(formStatus);
+
+      if (!isBridgeConnected()) {
+        showStatus(formStatus, "Connect to the bridge first (npm start in bridge/).", "err");
+        return;
+      }
+
+      const first = $("firstName").value.trim();
+      const last = $("lastName").value.trim();
+      const food = selectedFood();
+      if (!first || !last || !food) {
+        showStatus(formStatus, "Enter your name and choose a food.", "err");
+        return;
+      }
+
+      const btn = $("btnSubmit");
+      btn.disabled = true;
+      lineGate = null;
+      try {
+        showStatus(formStatus, "Enrollment on — tap your card on the reader…", "ok");
+        lastUid8 = null;
+        await writeLine("ENROLL ON");
+        const uid8 = await waitForEnrollUid(45000);
+        await writeLine("ADD " + uid8);
+        const addReply = await waitForAddReply(8000);
+        if (addReply !== "OK:ADD") {
+          await writeLine("ENROLL OFF");
+          throw new Error(
+            addReply === "ERR:DUPLICATE" ? "This card is already registered." : "Could not save card: " + addReply
+          );
+        }
+        await writeLine("ENROLL OFF");
+
+        const rows = loadOrders();
+        rows.push({
+          first,
+          last,
+          food,
+          uid8,
+          pickedUp: false,
+          created: new Date().toISOString(),
+        });
+        saveOrders(rows);
+
+        showStatus(formStatus, "Saved. Your card is linked — use it to open the box.", "ok");
+        $("orderForm").reset();
+      } catch (e) {
+        showStatus(formStatus, e.message || String(e), "err");
+        try {
+          await writeLine("ENROLL OFF");
+        } catch (_) {}
+      } finally {
+        lineGate = null;
+        btn.disabled = false;
+      }
+    });
+
+    $("btnRetryWs").addEventListener("click", () => {
+      clearTimeout(reconnectTimer);
+      try {
+        ws?.close();
+      } catch (_) {}
+      ws = null;
+      connectBridge();
+    });
+
+    connectBridge();
+    $("btnClearLocal").addEventListener("click", () => {
+      if (confirm("Remove all saved orders from this browser only?")) {
+        localStorage.removeItem(STORAGE_KEY);
+        renderOrders();
+      }
+    });
+
+    renderOrders();
+  </script>
+</body>
+</html>
